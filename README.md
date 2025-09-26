@@ -32,7 +32,7 @@ This is a simple Express application built with TypeScript.
 
 2. Navigate to the project directory:
    ```
-   cd express-app
+   cd Ecom-backend
    ```
 
 3. Install the dependencies:
@@ -42,7 +42,7 @@ This is a simple Express application built with TypeScript.
 
 4. Run the application:
    ```
-   npm start
+   npm run dev
    ```
 
 ## Usage
