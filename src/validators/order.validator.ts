@@ -25,10 +25,6 @@ export const orderValidationRules = () => {
       .matches(/^[a-zA-Z\s\u0600-\u06FF-]+$/).withMessage('City name can only contain letters, spaces, and hyphens')
       .trim().escape(),
 
-    body('customer_region')
-      .notEmpty().withMessage('Customer region is required')
-      .isLength({ min: 2, max: 100 }).withMessage('Customer region must be 2-100 characters long')
-      .matches(/^[a-zA-Z\s\u0600-\u06FF-]+$/).withMessage('Region name can only contain letters, spaces, and hyphens')
-      .trim().escape(),
+    body('customer_region').optional(),
   ];
 };
