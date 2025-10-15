@@ -11,7 +11,7 @@ const productImagesRepository = AppDataSource.getRepository(ProductImages);
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
     const products = await productRepository.find({
-      relations: ['productImages','productVariants'], // Use 'productImages' as defined in the Products entity
+      relations: ['productImages'], // Use 'productImages' as defined in the Products entity
     });
     res.status(200).json({
       message: "Products retrieved successfully",

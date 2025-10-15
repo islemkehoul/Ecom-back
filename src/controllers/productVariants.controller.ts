@@ -27,7 +27,7 @@ export const createProductVariant = async (req: Request, res: Response) => {
 
     }
   );
-    res.status(201).json({"message" : "Product variant created succesfully!"});
+    res.status(201).json({"message" : "Product variants created succesfully!"});
 
    
   } catch (error) {
