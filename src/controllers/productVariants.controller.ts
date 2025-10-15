@@ -5,9 +5,9 @@ import { Products } from '../entities/Products';
 
 export const createProductVariant = async (req: Request, res: Response) => {
   try {
-    const { productId, size, color, quantity, price } = req.body;
-   
-    const productRepository = AppDataSource.getRepository(Products);
+    req.body.forEach(async(element:any) => {
+      const { productId, size, color, quantity, price } = element;
+       const productRepository = AppDataSource.getRepository(Products);
     const product = await productRepository.findOneBy({ id: productId });
 
     if (!product) {
@@ -16,7 +16,7 @@ export const createProductVariant = async (req: Request, res: Response) => {
     const generatedSku = `${productId}-${size}-${color}`;
     const productVariantRepository = AppDataSource.getRepository(ProductVariants);
     const newProductVariant = productVariantRepository.create({
-      productId,
+      product,
       size,
       color,
       quantity,
@@ -25,7 +25,11 @@ export const createProductVariant = async (req: Request, res: Response) => {
     });
     await productVariantRepository.save(newProductVariant);
 
-    res.status(201).json(newProductVariant);
+    }
+  );
+    res.status(201).json({"message" : "Product variant created succesfully!"});
+
+   
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error creating product variant' });
