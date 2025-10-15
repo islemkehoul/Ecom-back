@@ -2,6 +2,7 @@ import { Router,Request,Response} from "express";
 import multer from 'multer';
 import express from "express";
 import { productValidationRules } from "../validators/product.validator";
+import { deleteAllProducts } from "../controllers/product.controller";
 
 const { getAllProducts,getProductById,createProduct,deleteProduct,updateProduct  } = require('../controllers/product.controller');
 
@@ -24,12 +25,14 @@ router.get("/products/:id", getProductById);
 
 router.post(
   "/products",
-  upload.single("image"),
+  upload.array("image", 5), // Allow up to 5 files with field name "images"
   productValidationRules(),
   createProduct
 );
 
 router.delete("/products/:id",deleteProduct);
+
+router.delete("/products", deleteAllProducts);
 
 router.patch("/products/:id",upload.single("image"), updateProduct);
 

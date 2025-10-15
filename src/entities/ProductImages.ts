@@ -1,11 +1,11 @@
-import { Column, Entity, Index, ManyToOne, JoinColumn, Relation } from "typeorm";
+import { Column, Entity, Index, ManyToOne, JoinColumn, PrimaryGeneratedColumn, Relation } from "typeorm";
 import { Products } from "./Products";
 
 @Index("product_images_pkey", ["id"], { unique: true })
 @Entity("product_images", { schema: "public" })
 export class ProductImages {
-  @Column("character varying", { primary: true, name: "id", length: 50 })
-  id!: string;
+  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
+  id!: number;
 
   @Column("character varying", { name: "product_id", length: 50 })
   productId!: string;

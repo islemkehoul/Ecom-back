@@ -2,21 +2,25 @@ import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { AppDataSource } from "../data-source";
 import { Products } from "../entities/Products";
+import { ProductImages } from "../entities/ProductImages";
 
 // Get the Product repository
 const productRepository = AppDataSource.getRepository(Products);
+const productImagesRepository = AppDataSource.getRepository(ProductImages);
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const products = await productRepository.find();
+    const products = await productRepository.find({
+      relations: ['productImages'], // Use 'productImages' as defined in the Products entity
+    });
     res.status(200).json({
       message: "Products retrieved successfully",
-      data: products
+      data: products,
     });
   } catch (error) {
     res.status(500).json({
       message: "Error retrieving products",
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
@@ -46,39 +50,68 @@ export const getProductById = async (req: Request, res: Response) => {
   }
 };
 
+
 export const createProduct = async (req: Request, res: Response) => {
-  console.log(req.body);
-  
+  console.log(req);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  
+
   const { id, name, price, description, category } = req.body;
-  const image = req.file ? req.file.filename : undefined;
-  
+  const files = req.files as Express.Multer.File[];
+
+  if (!files || files.length === 0) {
+    return res.status(400).json({ message: "At least one image is required" });
+  }
+
   try {
-    // Create a new product instance
-    const product = productRepository.create({
-      id,
-      name,
-      price,
-      description,
-      category,
-      image
+    // Use a transaction to ensure atomicity
+    const savedProduct = await productImagesRepository.manager.transaction(async (transactionalEntityManager) => {
+      // Check for duplicate id
+      if (id) {
+        const existingProduct = await transactionalEntityManager.findOne(productRepository.metadata.target, { where: { id } });
+        if (existingProduct) {
+          throw new Error("A product with this ID already exists");
+        }
+      }
+
+      // Create product instance
+      const product = productRepository.create({
+        id, // Include id if provided; omit if you want it auto-generated
+        name,
+        price,
+        description,
+        category,
+      });
+
+      // Save product
+      const savedProduct = await transactionalEntityManager.save(productRepository.metadata.target, product);
+
+      // Create ProductImages entries
+      const productImages = files.map((file, index) => ({
+        productId: savedProduct.id,
+        imageUrl: file.filename,
+        isMain: index === 0,
+      }));
+
+      // Save images
+      await transactionalEntityManager.save(productImagesRepository.metadata.target, productImages);
+
+      return { ...savedProduct, images: productImages };
     });
-    
-    // Save to database
-    const savedProduct = await productRepository.save(product);
-    
+
     res.status(201).json({
       message: "Product created successfully",
-      product: savedProduct
+      product: savedProduct,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === "A product with this ID already exists" || error.code === "23505") {
+      return res.status(400).json({ message: "A product with this ID already exists" });
+    }
     res.status(500).json({
       message: "Error creating product",
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 };
@@ -111,6 +144,31 @@ export const deleteProduct = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteAllProducts = async (req: Request, res: Response) => {
+  try {
+    // Fetch all products
+    const products = await productRepository.find();
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: 'No products found to delete' });
+    }
+
+    // Delete all products
+    await productRepository.remove(products);
+
+    res.status(200).json({
+      message: 'All products deleted successfully',
+      deletedCount: products.length,
+      products: products, // Optionally return deleted products for reference
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error deleting products',
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
 export const updateProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, price, description, category } = req.body;
@@ -131,7 +189,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     if (price !== undefined) product.price = price;
     if (description !== undefined) product.description = description;
     if (category !== undefined) product.category = category;
-    if (image !== undefined) product.image = image;
+    // if (image !== undefined) product.image = image;
     
     // Check if any field was updated
     if (name === undefined && price === undefined && description === undefined && 

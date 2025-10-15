@@ -9,7 +9,7 @@ import {
 import { Products } from "./Products";
 
 @Index("idx_orders_location", ["customerCity", "customerRegion"], {})
-@Index("orders_pkey", ["id"], { unique: true })
+// @Index("orders_pkey", ["id"], { unique: true })
 @Index("idx_orders_product_id", ["productId"], {})
 @Entity("orders", { schema: "public" })
 export class Orders {

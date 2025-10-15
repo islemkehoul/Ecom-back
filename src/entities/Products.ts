@@ -2,7 +2,7 @@ import { Column, Entity, Index, OneToMany,Relation } from "typeorm";
 import { Orders } from "./Orders";
 import { ProductImages } from "./ProductImages";
 
-@Index("products_pkey", ["id"], { unique: true })
+// @Index("products_pkey", ["id"], { unique: true })
 @Entity("products", { schema: "public" })
 export class Products {
   @Column("character varying", { primary: true, name: "id", length: 50 })
@@ -30,12 +30,12 @@ export class Products {
     | "sports"
     | null;
 
-  @Column("text", { name: "image", nullable: true })
-  image!: string | null;
-
   @OneToMany(() => Orders, (orders) => orders.product)
   orders!: Orders[];
 
-  @OneToMany(() => ProductImages, (productImages) => productImages.product)
+  @OneToMany(() => ProductImages, (productImages) => productImages.product,{
+    cascade:true,
+    onDelete:"CASCADE"
+  })
   productImages!: Relation<ProductImages[]>;
 }
