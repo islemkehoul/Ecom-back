@@ -1,6 +1,7 @@
 import { Column, Entity, Index, OneToMany,Relation } from "typeorm";
 import { Orders } from "./Orders";
 import { ProductImages } from "./ProductImages";
+import { ProductVariants } from "./ProductVariants";
 
 // @Index("products_pkey", ["id"], { unique: true })
 @Entity("products", { schema: "public" })
@@ -38,4 +39,10 @@ export class Products {
     onDelete:"CASCADE"
   })
   productImages!: Relation<ProductImages[]>;
+
+  @OneToMany(() => ProductVariants, (productVariants) => productVariants.product,{
+    cascade:true,
+    onDelete:"CASCADE"
+  })
+  productVariants!: Relation<ProductVariants[]>;
 }
