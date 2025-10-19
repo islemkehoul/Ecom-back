@@ -40,7 +40,7 @@ export const getProductVariants = async (req: Request, res: Response) => {
   try {
     const productVariantRepository = AppDataSource.getRepository(ProductVariants);
     const productVariants = await productVariantRepository.find({
-      relations: ['product'],
+      relations: ['product','product.productImages'],
     });
     res.status(200).json(productVariants);
   } catch (error) {
@@ -53,9 +53,9 @@ export const getProductVariantById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const productVariantRepository = AppDataSource.getRepository(ProductVariants);
-    const productVariant = await productVariantRepository.findOne({
-      where: { id: parseInt(id) },
-      relations: ['product'],
+    const productVariant = await productVariantRepository.find({
+      where: { productId: id},
+      relations: ['product','product.productImages'],
     });
 
     if (!productVariant) {
