@@ -16,9 +16,9 @@ export const createOrder = async (req: Request, res: Response) => {
     console.log(errors.array());
     return res.status(400).json({ errors: errors.array() });
   }
-  
-  const { product_id, customer_name, customer_phone, customer_city, customer_region } = req.body;
-  
+
+  const { product_id, customer_name, customer_phone, customer_city, customer_region, variant_sku } = req.body;
+
   try {
     // Optional: Verify that the product exists
     const productExists = await productsRepository.findOne({
@@ -37,7 +37,8 @@ export const createOrder = async (req: Request, res: Response) => {
       customerName: customer_name,
       customerPhone: customer_phone,
       customerCity: customer_city,
-      customerRegion: customer_region
+      customerRegion: customer_region,
+      sku: variant_sku // SKU can be null
     });
     
     // Save to database
@@ -59,7 +60,7 @@ export const getAllOrders = async (req: Request, res: Response) => {
   try {
     // Fetch all orders with product details using relation
     const orders = await ordersRepository.find({
-      relations: ['product'] // This will join with Products table
+       // This will join with Products table
     });
     
     if (orders.length === 0) {

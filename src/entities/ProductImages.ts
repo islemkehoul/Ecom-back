@@ -12,7 +12,8 @@ export class ProductImages {
 
   @Column("boolean", { name: "is_main", default: false })
   isMain!: boolean;
-
+  @Column("character varying", { name: "color", length: 50 , nullable: true })
+  color!: string | null;
   @Column("text", { name: "image_url", nullable: true })
   imageUrl!: string | null;
 

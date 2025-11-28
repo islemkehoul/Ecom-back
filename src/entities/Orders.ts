@@ -9,7 +9,6 @@ import {
 import { Products } from "./Products";
 
 @Index("idx_orders_location", ["customerCity", "customerRegion"], {})
-// @Index("orders_pkey", ["id"], { unique: true })
 @Index("idx_orders_product_id", ["productId"], {})
 @Entity("orders", { schema: "public" })
 export class Orders {
@@ -30,6 +29,9 @@ export class Orders {
 
   @Column("character varying", { name: "customer_region", length: 100 })
   customerRegion!: string;
+  
+  @Column("character varying", { name: "sku", length: 50 })
+  sku!: string;
 
   @ManyToOne(() => Products, (products) => products.orders, {
     onDelete: "CASCADE",
