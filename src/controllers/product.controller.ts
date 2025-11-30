@@ -53,7 +53,6 @@ export const getProductById = async (req: Request, res: Response) => {
 
 
 export const createProduct = async (req: Request, res: Response) => {
-  console.log(req);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
